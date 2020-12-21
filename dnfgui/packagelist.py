@@ -15,6 +15,8 @@ class PackageList(GObject.Object, Gtk.TreeModel):
         self.packages = packages
         GObject.GObject.__init__(self)
 
+    def get_package(self, path):
+        return self.packages[path[0]]
 
     # Implementation of virtual methods
 
