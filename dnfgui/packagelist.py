@@ -1,10 +1,10 @@
-import hawkey
+import dnf
 
 from gi.repository import Gtk, GObject
 
 
 class PackageList(GObject.Object, Gtk.TreeModel):
-    attributes = dir(hawkey.Package)
+    attributes = dir(dnf.package.Package)
     attr_to_index = {attr: index for index, attr in enumerate(attributes)}
 
     @classmethod
