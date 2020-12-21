@@ -1,6 +1,6 @@
 
 from gi.repository import Gtk, GObject
-from .packagelist import PackageList
+from .list import PackageList
 
 
 class PackageListView(Gtk.TreeView):

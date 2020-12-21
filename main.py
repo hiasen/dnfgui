@@ -5,8 +5,7 @@ import dnf
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, GObject
-from dnfgui.packagelist import PackageList
-from dnfgui.packagelistview import PackageListView
+from dnfgui.package import PackageList, PackageListView
 
 base = dnf.Base()
 base.read_all_repos()
@@ -18,7 +17,7 @@ class MyWindow(Gtk.Window):
     def __init__(self):
         Gtk.Window.__init__(self, title="Hello World")
         
-        self.tree = PackageListView(base.sack.query().installed().run())
+        self.tree = PackageListView([])
         self.tree.connect("row-activated", self.on_package_click)
         
         scrolled_window = Gtk.ScrolledWindow()
