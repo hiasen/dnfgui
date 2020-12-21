@@ -5,7 +5,7 @@ import dnf
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, GObject
-from dnfgui.package import PackageList, PackageListView
+from dnfgui.package import PackageList, PackageListView, PackageDetail
 
 base = dnf.Base()
 base.read_all_repos()
@@ -27,11 +27,12 @@ class MyWindow(Gtk.Window):
         entry = Gtk.Entry()
         entry.connect("activate", self.on_entry_activate)
         
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        box.add(entry)
-        box.add(scrolled_window)
+        self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self.box.add(entry)
+        self.box.add(scrolled_window)
 
-        self.add(box)
+        self.add(self.box)
+        self.package_detail = None
 
     def on_entry_activate(self, entry):
         subject = dnf.subject.Subject(entry.get_text())
@@ -42,31 +43,12 @@ class MyWindow(Gtk.Window):
     def on_package_click(self, tree_view, path, column):
         model = tree_view.get_model()
         package = model.get_package(path)
-        attributes = [
-            "name",
-            "version",
-            "release",
-            "arch",
-            "downloadsize",
-            "sourcerpm",
-            "reponame",
-            "summary",
-            "url",
-            "license",
-            "description",
-        ]
-        window = Gtk.Window(title=str(package))
-        grid = Gtk.Grid(column_spacing=10)
 
-        for row, attribute in enumerate(attributes):
-            key = Gtk.Label(label=attribute)
-            key.set_halign(Gtk.Align.START)
-            value = Gtk.Label(label=getattr(package, attribute))
-            value.set_halign(Gtk.Align.START)
-            grid.attach(key, 0, row, 1, 1)
-            grid.attach(value, 1, row, 1, 1)
-        window.add(grid)
-        window.show_all()
+        if self.package_detail is not None:
+            self.box.remove(self.package_detail)
+        self.package_detail = PackageDetail(package)
+        self.box.add(self.package_detail)
+        self.box.show_all()
 
 win = MyWindow()
 win.connect("destroy", Gtk.main_quit)
