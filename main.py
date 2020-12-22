@@ -17,6 +17,7 @@ class MyWindow(Gtk.Window):
         
         self.tree = PackageListView([])
         self.tree.connect("row-activated", self.on_package_click)
+        self.tree.props.activate_on_single_click = True
         
         scrolled_window = Gtk.ScrolledWindow()
         scrolled_window.set_vexpand(True)
