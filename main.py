@@ -1,21 +1,19 @@
 #!/usr/bin/env python
 import gi
 import dnf
+import threading
 
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, GObject
 from dnfgui.package import PackageList, PackageListView, PackageDetail
 
-base = dnf.Base()
-base.read_all_repos()
-base.fill_sack()
-assert base.sack
-
 
 class MyWindow(Gtk.Window):
     def __init__(self):
         Gtk.Window.__init__(self, title="Hello World")
+
+        self.base = dnf.Base()
         
         self.tree = PackageListView([])
         self.tree.connect("row-activated", self.on_package_click)
@@ -34,9 +32,13 @@ class MyWindow(Gtk.Window):
         self.add(self.box)
         self.package_detail = None
 
+        thread = threading.Thread(target=self.initialize_dnf)
+        thread.daemon = True
+        thread.start()
+
     def on_entry_activate(self, entry):
         subject = dnf.subject.Subject(entry.get_text())
-        query = subject.get_best_query(base.sack)
+        query = subject.get_best_query(self.base.sack)
         model = PackageList(query.run())
         self.tree.set_model(model)
 
@@ -49,6 +51,14 @@ class MyWindow(Gtk.Window):
         self.package_detail = PackageDetail(package)
         self.box.add(self.package_detail)
         self.box.show_all()
+
+    def initialize_dnf(self):
+        print("reading repos")
+        self.base.read_all_repos()
+        print("filling sack")
+        self.base.fill_sack()
+        print("filled sack")
+
 
 win = MyWindow()
 win.connect("destroy", Gtk.main_quit)
