@@ -11,7 +11,9 @@ from dnfgui.package import PackageList, PackageListView, PackageDetail
 
 class MyWindow(Gtk.Window):
     def __init__(self):
-        Gtk.Window.__init__(self, title="Hello World")
+        Gtk.Window.__init__(self, title="dnf")
+        self.props.default_width = 800
+        self.props.default_height = 600
 
         self.base = dnf.Base()
         
