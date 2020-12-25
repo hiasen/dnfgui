@@ -5,6 +5,11 @@ from gi.repository import Gtk, GObject
 
 from .package import PackageList, PackageListView, PackageDetail
 
+import os
+
+MAIN_UI_FILE = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        "main.ui")
 
 class App(Gtk.Application):
     def __init__(self, *args):
@@ -16,7 +21,14 @@ class App(Gtk.Application):
         thread.start()
 
     def do_activate(self):
-        win = AppWindow(application=self)
+        self.builder = Gtk.Builder.new_from_file(MAIN_UI_FILE)
+        self.builder.connect_signals(self)
+
+        self.tree = self.builder.get_object("package-list")
+        self.package_detail = self.builder.get_object("package-detail")
+
+        win = self.builder.get_object("main-window")
+        win.set_application(self)
         win.show_all()
 
     def initialize_dnf(self):
@@ -31,36 +43,8 @@ class App(Gtk.Application):
         query = subject.get_best_query(self.base.sack)
         return query.run()
 
-
-class AppWindow(Gtk.ApplicationWindow):
-
-    def __init__(self, application):
-        super().__init__(application=application, title="dnf")
-        self.props.default_width = 800
-        self.props.default_height = 600
-
-        self.tree = PackageListView([])
-        self.tree.connect("row-activated", self.on_package_click)
-        self.tree.props.activate_on_single_click = True
-
-        scrolled_window = Gtk.ScrolledWindow()
-        scrolled_window.set_vexpand(True)
-        scrolled_window.add(self.tree)
-
-        entry = Gtk.Entry()
-        entry.connect("activate", self.on_entry_activate)
-
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        box.add(entry)
-        box.add(scrolled_window)
-
-        self.package_detail = PackageDetail()
-        box.add(self.package_detail)
-
-        self.add(box)
-
     def on_entry_activate(self, entry):
-        packages = self.props.application.simple_query(entry.get_text())
+        packages = self.simple_query(entry.get_text())
         model = PackageList(packages)
         self.tree.set_model(model)
 

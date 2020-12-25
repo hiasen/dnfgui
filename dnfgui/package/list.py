@@ -10,9 +10,9 @@ class PackageList(GObject.Object, Gtk.TreeModel):
     @classmethod
     def get_index_of_attribute(cls, attr):
         return cls.attr_to_index[attr]
-    
-    def __init__(self, packages):
-        self.packages = packages
+
+    def __init__(self, packages=None):
+        self.packages = packages if packages is not None else []
         GObject.GObject.__init__(self)
 
     def get_package(self, path):

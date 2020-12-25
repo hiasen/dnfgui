@@ -4,9 +4,12 @@ from .list import PackageList
 
 
 class PackageListView(Gtk.TreeView):
-    def __init__(self, packages):
+    __gtype_name__ = "PackageListView"
+    def __init__(self, packages=None):
+        if packages is None:
+            packages = []
         store = PackageList(packages)
-        Gtk.TreeView.__init__(self, model=store)
+        super().__init__(model=store)
         renderer = Gtk.CellRendererText()
         self.append_column(Gtk.TreeViewColumn("Name", renderer, text=PackageList.get_index_of_attribute("name")))
         self.append_column(Gtk.TreeViewColumn("evr", renderer, text=PackageList.get_index_of_attribute("evr")))

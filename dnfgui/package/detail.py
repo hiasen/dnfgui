@@ -17,6 +17,7 @@ attributes = [
 
 
 class PackageDetail(Gtk.Bin):
+    __gtype_name__ = "PackageDetail"
 
     def __init__(self, package=None):
         super().__init__()
