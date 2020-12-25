@@ -50,12 +50,14 @@ class AppWindow(Gtk.ApplicationWindow):
         entry = Gtk.Entry()
         entry.connect("activate", self.on_entry_activate)
 
-        self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        self.box.add(entry)
-        self.box.add(scrolled_window)
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        box.add(entry)
+        box.add(scrolled_window)
 
-        self.add(self.box)
-        self.package_detail = None
+        self.package_detail = PackageDetail()
+        box.add(self.package_detail)
+
+        self.add(box)
 
     def on_entry_activate(self, entry):
         packages = self.props.application.simple_query(entry.get_text())
@@ -65,9 +67,4 @@ class AppWindow(Gtk.ApplicationWindow):
     def on_package_click(self, tree_view, path, column):
         model = tree_view.get_model()
         package = model.get_package(path)
-
-        if self.package_detail is not None:
-            self.box.remove(self.package_detail)
-        self.package_detail = PackageDetail(package)
-        self.box.add(self.package_detail)
-        self.box.show_all()
+        self.package_detail.set_package(package)
