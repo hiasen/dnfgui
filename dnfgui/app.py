@@ -7,18 +7,37 @@ from .package import PackageList, PackageListView, PackageDetail
 
 
 class App(Gtk.Application):
+    def __init__(self, *args):
+        super().__init__(*args)
+        self.base = dnf.Base()
+
+        thread = threading.Thread(target=self.initialize_dnf)
+        thread.daemon = True
+        thread.start()
+
     def do_activate(self):
         win = AppWindow(application=self)
         win.show_all()
 
+    def initialize_dnf(self):
+        print("reading repos")
+        self.base.read_all_repos()
+        print("filling sack")
+        self.base.fill_sack()
+        print("filled sack")
+
+    def simple_query(self, text):
+        subject = dnf.subject.Subject(text)
+        query = subject.get_best_query(self.base.sack)
+        return query.run()
+
 
 class AppWindow(Gtk.ApplicationWindow):
+
     def __init__(self, application):
         super().__init__(application=application, title="dnf")
         self.props.default_width = 800
         self.props.default_height = 600
-
-        self.base = dnf.Base()
 
         self.tree = PackageListView([])
         self.tree.connect("row-activated", self.on_package_click)
@@ -38,14 +57,9 @@ class AppWindow(Gtk.ApplicationWindow):
         self.add(self.box)
         self.package_detail = None
 
-        thread = threading.Thread(target=self.initialize_dnf)
-        thread.daemon = True
-        thread.start()
-
     def on_entry_activate(self, entry):
-        subject = dnf.subject.Subject(entry.get_text())
-        query = subject.get_best_query(self.base.sack)
-        model = PackageList(query.run())
+        packages = self.props.application.simple_query(entry.get_text())
+        model = PackageList(packages)
         self.tree.set_model(model)
 
     def on_package_click(self, tree_view, path, column):
@@ -57,11 +71,3 @@ class AppWindow(Gtk.ApplicationWindow):
         self.package_detail = PackageDetail(package)
         self.box.add(self.package_detail)
         self.box.show_all()
-
-    def initialize_dnf(self):
-        print("reading repos")
-        self.base.read_all_repos()
-        print("filling sack")
-        self.base.fill_sack()
-        print("filled sack")
-
